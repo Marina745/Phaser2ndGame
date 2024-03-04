@@ -60,8 +60,27 @@ function create() {
     //platforms.create(800, 470, 'ground');
    
     //додаємо камінці
+    stone = this.physics.add.staticGroup();
+    //Додаємо камінці на всю ширину екрану
+    for(var x = 500; x<worldWidth; x=x+Phaser.Math.FloatBetween(300, 1600)){
+        console.log(' x-'+ x)
+        stone.create(x, 1080-80,'stone').setOrigin(0,1).setScale(Phaser.Math.FloatBetween(0.5, 1)).refreshBody();
+    }
+    //додаємо траву
+    grass = this.physics.add.staticGroup();
+    //Додаємо траву на всю ширину екрану
+    for(var x = 500; x<worldWidth; x=x+Phaser.Math.FloatBetween(300, 1600)){
+    console.log(' x-'+ x)
+    grass.create(x, 1080-80,'grass').setOrigin(0,1).setScale(Phaser.Math.FloatBetween(0.2, 0.9)).refreshBody();
+}
 
-
+    //додаємо дерево
+    tree = this.physics.add.staticGroup();
+    //Додаємо дерево на всю ширину екрану
+    for(var x = 500; x<worldWidth; x=x+Phaser.Math.FloatBetween(300, 1600)){
+    console.log(' x-'+ x)
+    tree.create(x, 1080-80,'tree').setOrigin(0,1).setScale(Phaser.Math.FloatBetween(0.5, 1)).refreshBody();
+}
     player = this.physics.add.sprite(100, 450, 'dude');
 
     player.setBounce(0.2);
