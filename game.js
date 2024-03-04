@@ -1,5 +1,6 @@
 var config = {
     type: Phaser.AUTO,
+   
     width: 800,
     height: 600,
     physics: {
@@ -98,6 +99,8 @@ this.physics.add.collider(bombs, platforms);
 
 this.physics.add.collider(player, bombs, hitBomb, null, this);
 
+this.physics.world.setBounds(0, 0, Number.MAX_SAFE_INTEGER, 1000);
+this.cameras.main.startFollow(player);
 }
 
 function update ()
