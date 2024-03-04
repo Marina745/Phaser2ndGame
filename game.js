@@ -25,7 +25,7 @@ var score = 0;
 var scoreText;
 var bombs;
 var game;
-var worldWidth = 10000;
+var worldWidth = 9600;
 
 var game = new Phaser.Game(config);
 
@@ -35,23 +35,32 @@ function preload() {
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.image('stone', 'assets/stone.png');
+    this.load.image('tree', 'assets/tree.png');
+    this.load.image('grass', 'assets/grass.png');
 }
 
 function create() {
     //this.add.image(400, 300, 'sky');
     this.add.tileSprite(0, 0, worldWidth, 1080, "sky").setOrigin(0, 0);
+    
+    // додаємо платформи на весь екран
     platforms = this.physics.add.staticGroup();
-   // додаємо платформи на весь екран
-    for(var x = 0; x< worldWidth; x= x + 450){ 
+   
+   for(var x = 0; x< worldWidth; x= x + 450){ 
      console.log(x)
      platforms.create(x, 1000, 'ground').setOrigin(0,0).refreshBody();
     }
 
-    platforms.create(400, 868, 'ground').setScale(2).refreshBody();
-    platforms.create(300, 700, 'ground');
-    platforms.create(600, 550, 'ground');
-    platforms.create(20, 350, 'ground');
-    platforms.create(750, 320, 'ground');
+
+    //platforms.create(500, 700, 'ground');
+    //platforms.create(300, 850, 'ground');
+    //platforms.create(20, 550, 'ground');
+    //platforms.create(200, 288, 'ground');
+    //platforms.create(800, 470, 'ground');
+   
+    //додаємо камінці
+
 
     player = this.physics.add.sprite(100, 450, 'dude');
 
