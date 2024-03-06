@@ -42,13 +42,14 @@ function preload() {
 }
 
 function create() {
+   //фон плитки
     //this.add.image(400, 300, 'sky');
     this.add.tileSprite(0, 0, worldWidth, 1080, "sky").setOrigin(0, 0);
     
     // додаємо платформи на весь екран
     platforms = this.physics.add.staticGroup();
    
-   for(var x = 0; x< worldWidth; x= x + 450){ 
+   for(var x = 0; x< worldWidth; x= x + 100){ 
      console.log(x)
      platforms.create(x, 1000, 'ground').setOrigin(0,0).refreshBody();
     }
