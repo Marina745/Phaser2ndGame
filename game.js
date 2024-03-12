@@ -18,22 +18,23 @@ var config = {
     }
 };
 
-var player;
-var stars;
-var platforms;
+var player; //гравець
+var stars;  //зірки
+var platforms;  //платформи
 var cursors;
-var score = 0;
-var scoreText;
-var bombs;
+var score = 0;  //кількість очків
+var scoreText;  //текстова зміна очків
+var bombs;  //бомби
 var game;
-var worldWidth = 9600;
-var lives=3;
-var live=0;
+var worldWidth = 9600;  //ширина світу
+var lives=3;    //кількість життів
+var livesText;  //текстова зміна життів
 var game = new Phaser.Game(config);
-var resetButton
-var hearts
+var resetButton;    //кнопка перезапуску
+var hearts; //життя
 
 function preload() {
+    //загружаємо обєкти
     this.load.image('sky', 'assets/sky.png');
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
@@ -68,7 +69,7 @@ function create() {
             .setOrigin(0, 0)
             .refreshBody();
     }
-
+    //додаємо верхні платформи рандомно
     for (var x = 0; x < worldWidth; x = x + Phaser.Math.Between(600, 700)) {
         var y = Phaser.Math.FloatBetween(700, 93 * 10)
         platforms.create(x, y, 'platformStart');
@@ -107,34 +108,35 @@ function create() {
         .setDepth(Phaser.Math.FloatBetween(1,10))
     }
 
-
+    //гравець
     player = this.physics.add.sprite(100, 450, 'dude');
     player
     .setBounce(0.2)
     .setCollideWorldBounds(false)
     .setDepth(5)
 
-    //player.setCollideWorldBounds(true);
+    player.setCollideWorldBounds(true);
 
-    //
+    
     this.cameras.main.setBounds(0, 0, worldWidth, window.innerHeight);
     this.physics.world.setBounds(0, 0, worldWidth, window.innerHeight);
 
     this.cameras.main.startFollow(player);
 
+    // анімація в ліво
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
         frameRate: 10,
         repeat: -1
     });
-
+    // анімація коли гравець стоїть
     this.anims.create({
         key: 'turn',
         frames: [{ key: 'dude', frame: 4 }],
         frameRate: 20
     });
-
+    // анімація в право
     this.anims.create({
         key: 'right',
         frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
@@ -144,50 +146,52 @@ function create() {
 
     cursors = this.input.keyboard.createCursorKeys();
 
-
+    //зірки
     stars = this.physics.add.group({
         key: 'star',
         repeat: 30,
         setXY: { x: 12, y: 0, stepX: 110 }
     });
     
-
+    //життя
     hearts = this.physics.add.group({
         key: 'hearts',
         repeat: 10,
         setXY: { x: 12, y: 0, stepX: 550 }
+    
+        
     });
+
+    //фізика для життів
+        this.physics.add.collider(hearts, platforms);
+
+        // this.physics.add.overlap(player, hearts, collectHearts, null, this);
 
     stars.children.iterate(function (child) {
 
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
     });
-    
-    this.physics.add.collider(stars, platforms);
+
+    // фізика для зірок
+        this.physics.add.collider(stars, platforms);
+
+        this.physics.add.overlap(player, stars, collectStar, null, this);
 
 
-    this.physics.add.overlap(player, stars, collectStar, null, this);
-
-    this.physics.add.collider(hearts, platforms);
-     
-
-
+// фізика для гравця
     this.physics.add.collider(player, platforms);
-   
+  
+    // текст рахунку
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
-
+    //текст життів
     livesText = this.add.text(1000, 0, 'Lives: = 3', { fontSize: '30px', fill: '#000' })
     .setOrigin(0,0)
    .setScrollFactor(0)
    
-
-
-
+//фізика бомб
     bombs = this.physics.add.group();
-
     this.physics.add.collider(bombs, platforms);
-
     this.physics.add.collider(player, bombs, hitBomb, null, this);
      
    
@@ -198,12 +202,14 @@ function create() {
 
 
 function update() {
-    if (cursors.left.isDown) {
+  // якщо натиснута стрілка вліво 
+   if (cursors.left.isDown) { 
         player.setVelocityX(-160);
 
         player.anims.play('left', true);
     }
-    else if (cursors.right.isDown) {
+  // якщо натиснута стрілка вправо 
+   else if (cursors.right.isDown) {
         player.setVelocityX(160);
 
         player.anims.play('right', true);
@@ -220,18 +226,15 @@ function update() {
 }
 
 function hitBomb(player, bomb) {
-    lives += -1;
+   lives += -1;
    livesText.setText('Lives: '+ lives);
-
-}
-
-  function live(lives,scoreText){
-    if ('Lives: = 0') {
+        if ('Lives: = 0') {
+    
         this.physics.pause(); // зупинити гру
         player.setTint(0xff0000); // замалювати гравця червоним кольором 
         gameOver = true;
-    }
-  }
+}  
+}
 
 
    
@@ -260,9 +263,9 @@ function collectStar(player, star) {
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
 
     }
-//     function  collectheats(player,hearts){
-//         heart.disableBody(true, true);
-//         lives += 1
-//         livesText.setText('Lives: '+ lives);
-//     }
-}
+    function  collectHearts(player,hearts){
+                heart.disableBody(true, true);
+                lives += 1
+                livesText.setText('Lives: ' + lives);
+            }
+        }
