@@ -31,7 +31,8 @@ var life = 5;    //кількість життів
 var lifesText;  //текстова зміна життів
 var game = new Phaser.Game(config);
 var resetButton;    //кнопка перезапуску
-var hearts; //життя
+var powers; //життя
+var enemy; 
 
 function preload() {
     //загружаємо обєкти
@@ -46,7 +47,8 @@ function preload() {
     this.load.image('platformStart', 'assets/platformStar.png');
     this.load.image('platformOne', 'assets/platformOne.png');
     this.load.image('platformFinish', 'assets/platformFinish.png');
-    this.load.image('hearts', 'assets/hearts.png');
+    this.load.image('powers', 'assets/power.png');
+    this.load.image('enemy', 'assets/enemy.png');
 }
 
 function create() {
@@ -117,7 +119,20 @@ function create() {
 
     player.setCollideWorldBounds(true);
 
-//
+
+   
+   
+        // var direction = Phaser.Math.Between(0, 1) ? 1 : -1; // 1 - рух вправо, -1 - рух вліво
+        // player2.setVelocityX(180 * direction); // Встановлення швидкості залежно від напрямку
+
+        // enemy = game.add.sprite(game.world.centerX, game.world.centerY, 'enemy'); 
+        // enemy.anchor.setTo(0.5, 0.5);
+        //  enemy.speed = 100;
+        //   enemy.direction = 1; 
+        //   enemy.changeDirectionTime = game.time.now + game.rnd.integerInRange(1000, 10000); }
+    
+            
+
     this.cameras.main.setBounds(0, 0, worldWidth, window.innerHeight);
     this.physics.world.setBounds(0, 0, worldWidth, window.innerHeight);
     this.cameras.main.startFollow(player);
@@ -153,24 +168,21 @@ function create() {
     });
 
     //життя
-    hearts = this.physics.add.group({
-        key: 'hearts',
+    powers = this.physics.add.group({
+        key: 'powers',
         repeat: 10,
         setXY: { x: 12, y: 0, stepX: 550 }
 
 
     });
 
-    //фізика для життів
-    this.physics.add.collider(hearts, platforms);
+    this.physics.add.collider(powers, platforms);
 
-    // this.physics.add.overlap(player, hearts, collectHearts, null, this);
-
-    stars.children.iterate(function (child) {
-
+    powers.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
+        child.setGravityY(300);
     });
+
 
     // фізика для зірок
     this.physics.add.collider(stars, platforms);
@@ -211,6 +223,7 @@ function create() {
 
 
 
+
 function update() {
     // якщо натиснута стрілка вліво 
     if (cursors.left.isDown) {
@@ -234,6 +247,7 @@ function update() {
         player.setVelocityY(-330);
     }
 }
+   
 
 //формування смуги життя
 function showLife() {
