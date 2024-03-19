@@ -33,6 +33,13 @@ var game = new Phaser.Game(config);
 var resetButton;    //кнопка перезапуску
 var powers; //життя
 var enemy; 
+var bullet; // Спрайти пуль
+var fireButton; // Кнопка вогню
+var enemySpeed = 1;
+var enemyAggroRange = 300;
+var enemyText; 
+
+
 
 function preload() {
     //загружаємо обєкти
@@ -49,6 +56,7 @@ function preload() {
     this.load.image('platformFinish', 'assets/platformFinish.png');
     this.load.image('powers', 'assets/power.png');
     this.load.image('enemy', 'assets/enemy.png');
+    this.load.image('bullet', 'assets/bullet.png');
 }
 
 function create() {
@@ -67,7 +75,7 @@ function create() {
     for (var x = 0; x < worldWidth; x = x + 100) {
         //console.log(x)
         platforms
-            .create(x, 1000, 'ground')
+            .create(x, 970, 'ground')
             .setOrigin(0, 0)
             .refreshBody();
     }
@@ -87,14 +95,14 @@ function create() {
     //Додаємо камінці на всю ширину екрану
     for (var x = 500; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 1600)) {
         //console.log(' x-' + x)
-        stone.create(x, 1080 - 80, 'stone').setOrigin(0, 1).setScale(Phaser.Math.FloatBetween(0.5, 1)).refreshBody().setDepth(Phaser.Math.FloatBetween(1, 10));
+        stone.create(x, 1080 - 110, 'stone').setOrigin(0, 1).setScale(Phaser.Math.FloatBetween(0.5, 1)).refreshBody().setDepth(Phaser.Math.FloatBetween(1, 10));
     }
     //додаємо траву
     grass = this.physics.add.staticGroup();
     //Додаємо траву на всю ширину екрану
     for (var x = 500; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 1600)) {
         // console.log(' x-' + x)
-        grass.create(x, 1080 - 80, 'grass').setOrigin(0, 1).setScale(Phaser.Math.FloatBetween(0.2, 0.9)).refreshBody().setDepth(Phaser.Math.FloatBetween(1, 10));
+        grass.create(x, 1080 - 110, 'grass').setOrigin(0, 1).setScale(Phaser.Math.FloatBetween(0.2, 0.9)).refreshBody().setDepth(Phaser.Math.FloatBetween(1, 10));
     }
 
     //додаємо дерево
@@ -103,7 +111,7 @@ function create() {
     for (var x = 500; x < worldWidth; x = x + Phaser.Math.FloatBetween(300, 1600)) {
         //console.log(' x-' + x)
         tree
-            .create(x, 1080 - 80, 'tree')
+            .create(x, 1080 - 110, 'tree')
             .setOrigin(0, 1)
             .setScale(Phaser.Math.FloatBetween(0.5, 1))
             .refreshBody()
@@ -119,19 +127,6 @@ function create() {
 
     player.setCollideWorldBounds(true);
 
-
-   
-   
-        // var direction = Phaser.Math.Between(0, 1) ? 1 : -1; // 1 - рух вправо, -1 - рух вліво
-        // player2.setVelocityX(180 * direction); // Встановлення швидкості залежно від напрямку
-
-        // enemy = game.add.sprite(game.world.centerX, game.world.centerY, 'enemy'); 
-        // enemy.anchor.setTo(0.5, 0.5);
-        //  enemy.speed = 100;
-        //   enemy.direction = 1; 
-        //   enemy.changeDirectionTime = game.time.now + game.rnd.integerInRange(1000, 10000); }
-    
-            
 
     this.cameras.main.setBounds(0, 0, worldWidth, window.innerHeight);
     this.physics.world.setBounds(0, 0, worldWidth, window.innerHeight);
@@ -194,23 +189,31 @@ function create() {
     this.physics.add.collider(player, platforms);
 
     // текст рахунку
-    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '42px', fill: '#000' });
+    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '42px', fill: '#000' })
+    .setInteractive()
+    .setScrollFactor(0)
+
     //текст життів
     lifeText = this.add.text(1500, 100, showLife(), { fontSize: '40px', fill: '#000' })
         .setOrigin(0, 0)
         .setScrollFactor(0)
-        //Кнопка перезапуск гри
-        var resetButton = this.add.text(400, 450, 'reset', { fontSize: '40px', fill: '#ccc' })
         .setInteractive()
-        .setScrollFactor(0);
-
-        resetButton.on('pointerdown', function (){
-            console.log('restart')
-            refreshBody()
-        }
-        )
+    
+        //Кнопка перезапуск гри
+        var resetButton = this.add.text(400, 100, 'reset', {fontSize: '40px', fill: '#ccc'})
+    .setInteractive()
+    .setScrollFactor(0)
 
 
+    resetButton.on('pointerdown', function(){
+    console.log('restart')
+    refreshBody()
+});
+emineText = this.add.text(1000, 100, 'emine(5)', { fontSize: '40px', fill: '#000' })
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setInteractive()
+    
     //фізика бомб
     bombs = this.physics.add.group();
     this.physics.add.collider(bombs, platforms);
@@ -219,12 +222,32 @@ function create() {
 
     this.physics.world.setBounds(0, 0, Number.MAX_SAFE_INTEGER, 1000);
     this.cameras.main.startFollow(player);
+
+ // Створюємо групу для пуль
+ bullets = this.physics.add.group();
+
+ // Встановлюємо кнопку для стрільби (Enter)
+ fireButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
+bullet = this.physics.add.group();
+this.physics.add.collider(bullet, enemy, hitEnemy, null, this);
+
+    enemies = this.physics.add.group({
+        key: 'enemy',
+        repeat: 5,
+        setXY: { x: 700, y: 100, stepX: 600 }
+    });
+
+    enemies.children.iterate(function (enemy) {
+        enemy.setCollideWorldBounds(true);
+        enemy.setVelocityX(-enemySpeed);
+    });
+    this.physics.add.overlap(player, enemy, enemyAggro, null, this);
+    this.physics.add.collider(player, enemy, playerEnemyCollision, null, this);
 }
 
-
-
-
 function update() {
+    
     // якщо натиснута стрілка вліво 
     if (cursors.left.isDown) {
         player.setVelocityX(-160);
@@ -246,8 +269,54 @@ function update() {
     if (cursors.up.isDown && player.body.touching.down) {
         player.setVelocityY(-330);
     }
+    enemies.children.iterate(function (enemy) {
+        if (Phaser.Math.Distance.Between(player.x, player.y, enemy.x, enemy.y) < enemyAggroRange) {
+            // Move towards the player
+            this.physics.moveToObject(enemy, player, 100);
+        } else {
+            // Move randomly
+            enemy.setVelocityX(-enemySpeed);
+        }
+    }, this);
+
+    if (fireButton.isDown) {
+        fireBullet();
+    }
+
+    
+
 }
-   
+function enemyAggro(player, enemy) {
+    // Зменшуємо здоров'я гравця
+    playerlife -= 1;
+    lifeText.setText(showLife())
+
+    // Прибираємо ворога, який атакував гравця
+    enemy.disableBody(true, true);
+
+    // Оновлюємо текст з кількістю ворогів
+   (updateEnemyText);
+}
+function fireBullet() {
+    // Створюємо пулю на позиції гравця
+    var bullet = bullets.create(player.x, player.y, 'bullet'); // 'bullet' - ваша назва спрайту пулів
+
+    // Налаштовуємо швидкість пулі
+    bullet.setVelocityX(1000); // Наприклад, стріляємо праворуч зі швидкістю 1000
+
+    // Додаткові дії для пулів, наприклад, колізія або інше
+    // Це залежить від вашої логіки гри
+}
+
+function hitEnemy(bullet, enemy) {
+    // Пуля торкалася ворога, тому прибираємо обидва спрайти
+    bullet.destroy();
+    enemy.destroy();
+
+    // Отримайте бали 
+    score += 10;
+    scoreText.setText('Score: ' + score);
+}
 
 //формування смуги життя
 function showLife() {
@@ -302,14 +371,29 @@ function collectStar(player, star) {
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
 
     }
-    function collectHearts(player, hearts) {
+    function hitHeart(player, heart) {
         heart.disableBody(true, true);
-        lives += 1
-        livesText.setText('Lives: ' + lives);
+        lifes += 1
+        lifesText.setText('Lifes: ' + lifes);
+        if (life>10) life = 10;
     }
 
     function refreshBody(){
         console.log('game over')
         this.scene.restart();
+    }
+}
+function playerEnemyCollision(player, enemy) {
+    // Зменшення кількості життів гравця
+    lifes--;
+    console.log('Lifes: ' + lifes);
+
+    // Видалення ворога
+    enemy.disableBody(true, true);
+
+    // Перевірка, чи гравець вже не має життів
+    if (playerHealth <= 0) {
+        // Додайте тут код, що відбувається, коли у гравця закінчуються житті
+        console.log("Гравець програв");
     }
 }
