@@ -198,6 +198,7 @@ function create() {
         .setOrigin(0, 0)
         .setScrollFactor(0)
         .setInteractive()
+        .setOrigin(0, 0)
     
         //Кнопка перезапуск гри
         var resetButton = this.add.text(400, 100, 'reset', {fontSize: '40px', fill: '#ccc'})
@@ -209,7 +210,7 @@ function create() {
     console.log('restart')
     refreshBody()
 });
-emineText = this.add.text(1000, 100, 'emine(5)', { fontSize: '40px', fill: '#000' })
+emineText = this.add.text(1000, 100, 'enemy(5)', { fontSize: '40px', fill: '#000' })
         .setOrigin(0, 0)
         .setScrollFactor(0)
         .setInteractive()
@@ -230,7 +231,7 @@ emineText = this.add.text(1000, 100, 'emine(5)', { fontSize: '40px', fill: '#000
  fireButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
 bullet = this.physics.add.group();
-this.physics.add.collider(bullet, enemy, hitEnemy, null, this);
+this.physics.add.overlap(bullet, enemy, hitEnemy, null, this);
 
     enemies = this.physics.add.group({
         key: 'enemy',
@@ -283,12 +284,14 @@ function update() {
         fireBullet();
     }
 
-    
+    if (lifeText.setText(showLife())){
+        gameOver = true;
+    }
 
 }
 function enemyAggro(player, enemy) {
     // Зменшуємо здоров'я гравця
-    playerlife -= 1;
+    life -= 1;
     lifeText.setText(showLife())
 
     // Прибираємо ворога, який атакував гравця
@@ -312,6 +315,7 @@ function hitEnemy(bullet, enemy) {
     // Пуля торкалася ворога, тому прибираємо обидва спрайти
     bullet.destroy();
     enemy.destroy();
+    console.log('hghg')
 
     // Отримайте бали 
     score += 10;
